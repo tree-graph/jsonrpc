@@ -404,7 +404,14 @@ fn ident(s: &str) -> syn::Ident {
 }
 
 fn is_option_type(ty: &syn::Type) -> bool {
-	if let syn::Type::Path(path) = ty {
+	let mut arg_type = ty;
+
+	// When RPC macros used in another marcros, the real arg type will be in a Group type
+	if let syn::Type::Group(group) = arg_type {
+		arg_type = &*group.elem;
+	}
+
+	if let syn::Type::Path(path) = arg_type {
 		path.path.segments.first().map_or(false, |t| t.ident == "Option")
 	} else {
 		false
